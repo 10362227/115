@@ -3,8 +3,8 @@ import Store from './store'
 
 class UI {
   constructor () {
-    this.version = '0.3.9'
-    this.updateDate = '2021/04/03'
+    this.version = '0.5.1'
+    this.updateDate = '2022/10/02'
     Store.on('updateView', (configData) => {
       this.updateSetting(configData)
       this.updateMenu(configData)
@@ -166,10 +166,10 @@ class UI {
             </div>
             <div class="setting-menu-row rpc-s">
               <div class="setting-menu-name">
-                <input class="setting-menu-input name-s" spellcheck="false">
+                <input class="setting-menu-input name-s" spellcheck="false" placeholder="名称">
               </div>
               <div class="setting-menu-value">
-                <input class="setting-menu-input url-s" spellcheck="false">
+                <input class="setting-menu-input url-s" spellcheck="false" placeholder="示例: http://token:RPC密钥@127.0.0.1:6800/jsonrpc">
                 <a class="setting-menu-button" id="addRPC" href="javascript:void(0);">添加RPC地址</a>
               </div>
             </div><!-- /.setting-menu-row -->
@@ -191,18 +191,18 @@ class UI {
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
               <div class="setting-menu-name">
-                <label class="setting-menu-label">小文件优先</label>
+                <label class="setting-menu-label">115会员</label>
               </div>
               <div class="setting-menu-value">
-                <input type="checkbox" class="setting-menu-checkbox small-s">
+                <input type="checkbox" class="setting-menu-checkbox vip-s">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
               <div class="setting-menu-name">
-                <label class="setting-menu-label">强制SSL下载</label>
+                <label class="setting-menu-label">小文件优先</label>
               </div>
               <div class="setting-menu-value">
-                <input type="checkbox" class="setting-menu-checkbox ssl-s">
+                <input type="checkbox" class="setting-menu-checkbox small-s">
               </div>
             </div><!-- /.setting-menu-row -->
             <div class="setting-menu-row">
@@ -282,10 +282,10 @@ class UI {
       const RPC = `
         <div class="setting-menu-row rpc-s">
           <div class="setting-menu-name">
-            <input class="setting-menu-input name-s" spellcheck="false">
+            <input class="setting-menu-input name-s" spellcheck="false" placeholder="名称">
           </div>
           <div class="setting-menu-value">
-            <input class="setting-menu-input url-s" spellcheck="false">
+            <input class="setting-menu-input url-s" spellcheck="false" placeholder="示例: http://token:RPC密钥@127.0.0.1:6800/jsonrpc">
           </div>
         </div><!-- /.setting-menu-row -->`
       Array.from(rpcDOMList).pop().insertAdjacentHTML('afterend', RPC)
@@ -323,7 +323,7 @@ class UI {
   }
 
   updateSetting (configData) {
-    const { rpcList, configSync, sha1Check, ssl, small, interval, downloadPath, userAgent, browserUserAgent, referer, headers } = configData
+    const { rpcList, configSync, sha1Check, vip, small, interval, downloadPath, userAgent, browserUserAgent, referer, headers } = configData
     // reset dom
     document.querySelectorAll('.rpc-s').forEach((rpc, index) => {
       if (index !== 0) {
@@ -339,10 +339,10 @@ class UI {
         const RPC = `
           <div class="setting-menu-row rpc-s">
             <div class="setting-menu-name">
-              <input class="setting-menu-input name-s" value="${rpc.name}" spellcheck="false">
+              <input class="setting-menu-input name-s" value="${rpc.name}" spellcheck="false" placeholder="名称">
             </div>
             <div class="setting-menu-value">
-              <input class="setting-menu-input url-s" value="${rpc.url}" spellcheck="false">
+              <input class="setting-menu-input url-s" value="${rpc.url}" spellcheck="false" placeholder="示例: http://token:RPC密钥@127.0.0.1:6800/jsonrpc">
             </div>
           </div><!-- /.setting-menu-row -->`
         Array.from(rpcDOMList).pop().insertAdjacentHTML('afterend', RPC)
@@ -350,7 +350,7 @@ class UI {
     })
     document.querySelector('.configSync-s').checked = configSync
     document.querySelector('.sha1Check-s').checked = sha1Check
-    document.querySelector('.ssl-s').checked = ssl
+    document.querySelector('.vip-s').checked = vip
     document.querySelector('.small-s').checked = small
     document.querySelector('.interval-s').value = interval
     document.querySelector('.downloadPath-s').value = downloadPath
@@ -370,11 +370,13 @@ class UI {
       const url = rpc.querySelector('.url-s').value
       if (name && url) {
         return { name, url }
+      } else {
+        return null
       }
     }).filter(el => el)
     const configSync = document.querySelector('.configSync-s').checked
     const sha1Check = document.querySelector('.sha1Check-s').checked
-    const ssl = document.querySelector('.ssl-s').checked
+    const vip = document.querySelector('.vip-s').checked
     const small = document.querySelector('.small-s').checked
     const interval = document.querySelector('.interval-s').value
     const downloadPath = document.querySelector('.downloadPath-s').value
@@ -387,7 +389,7 @@ class UI {
       rpcList,
       configSync,
       sha1Check,
-      ssl,
+      vip,
       small,
       interval,
       downloadPath,

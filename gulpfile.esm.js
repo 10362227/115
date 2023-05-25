@@ -3,13 +3,9 @@ import gulp from 'gulp'
 import rollupEach from 'gulp-rollup-each'
 import rollupCommon from '@rollup/plugin-commonjs'
 import rollupResolve from '@rollup/plugin-node-resolve'
-import rollupBuble from '@rollup/plugin-buble'
 
 import del from 'del'
 import gulpIf from 'gulp-if'
-
-import eslint from 'gulp-eslint'
-import stylelint from 'gulp-stylelint'
 
 import postcss from 'gulp-postcss'
 import dartSass from 'sass'
@@ -25,6 +21,8 @@ import pngquant from 'imagemin-pngquant'
 import plumber from 'gulp-plumber'
 
 import terser from 'gulp-terser'
+
+import zip from 'gulp-zip'
 
 const sass = gulpSass(dartSass)
 
@@ -69,36 +67,15 @@ const config = {
   }
 }
 
-function lintJS () {
-  return gulp.src(paths.scripts.src)
-    .pipe(eslint())
-    .pipe(eslint.format())
-    .pipe(eslint.failAfterError())
-}
-
-function lintCSS () {
-  return gulp.src(paths.styles.src)
-    .pipe(stylelint({
-      reporters: [
-        { formatter: 'string', console: true }
-      ]
-    }))
-}
-
 function scripts () {
   return gulp.src(paths.scripts.entry, { sourcemaps: config.env.dev })
     .pipe(plumber(config.plumberConfig))
-    .pipe(eslint())
-    .pipe(eslint.format())
     .pipe(rollupEach({
       isCache: true,
       plugins: [
         rollupCommon(),
         rollupResolve({
           browser: true
-        }),
-        rollupBuble({
-          transforms: { forOf: false, asyncAwait: false }
         })
       ]
     },
@@ -113,11 +90,6 @@ function scripts () {
 function styles () {
   return gulp.src(paths.styles.src)
     .pipe(plumber(config.plumberConfig))
-    .pipe(stylelint({
-      reporters: [
-        { formatter: 'string', console: true }
-      ]
-    }))
     .pipe(sass({
       precision: 3,
       includePaths: ['.']
@@ -162,13 +134,17 @@ function watch () {
   gulp.watch(paths.styles.src, styles)
 }
 
+export function compress () {
+  return gulp.src(paths.compress.src)
+    .pipe(zip('chrome.zip'))
+    .pipe(gulp.dest(paths.compress.dest))
+}
+
 const build = gulp.parallel(scripts, styles, images, copys, copyVendor)
 const serve = gulp.series(clean, build, watch)
-const publish = gulp.series(clean, build)
+const publish = gulp.series(clean, build, compress)
 
 exports.build = build
 exports.serve = serve
 exports.publish = publish
-exports.lintJS = lintJS
-exports.lintCSS = lintCSS
 exports.clean = clean

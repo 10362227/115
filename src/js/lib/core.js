@@ -83,7 +83,7 @@ class Core {
     } else if (type === 'idm') {
       return headerOption.map((item) => {
         const headers = item.split(': ')
-        return `${headers[0].toLowerCase()}: ${headers[1]}`
+        return `${headers[0]}: ${headers[1]}`
       }).join('\r\n')
     }
   }
@@ -145,15 +145,12 @@ class Core {
   }
 
   copyText (text) {
-    const input = document.createElement('textarea')
-    document.body.appendChild(input)
-    input.value = text
-    input.focus()
-    input.select()
-    const result = document.execCommand('copy')
-    input.remove()
-    if (result) {
-      this.showToast('拷贝成功~', 'inf')
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.showToast('拷贝成功~', 'inf')
+      }).catch(() => {
+        this.showToast('拷贝失败 QAQ', 'err')
+      })
     } else {
       this.showToast('拷贝失败 QAQ', 'err')
     }
@@ -170,7 +167,6 @@ class Core {
 
   aria2RPCMode (rpcPath, fileDownloadInfo) {
     const { authStr, path, options } = this.parseURL(rpcPath)
-    const ssl = this.getConfigData('ssl')
     const small = this.getConfigData('small')
 
     if (small) {
@@ -179,9 +175,6 @@ class Core {
 
     fileDownloadInfo.forEach((file) => {
       this.cookies = file.cookies
-      if (ssl) {
-        file.link = file.link.replace(/^(http:\/\/)/, 'https://')
-      }
       const rpcData = {
         jsonrpc: '2.0',
         method: 'aria2.addUri',
@@ -223,12 +216,8 @@ class Core {
     const idmTxt = []
     const downloadLinkTxt = []
     const prefixTxt = 'data:text/plain;charset=utf-8,'
-    const ssl = this.getConfigData('ssl')
     fileDownloadInfo.forEach((file) => {
       this.cookies = file.cookies
-      if (ssl) {
-        file.link = file.link.replace(/^(http:\/\/)/, 'https://')
-      }
       let aria2CmdLine = `aria2c -c -s10 -k1M -x16 --enable-rpc=false -o ${JSON.stringify(file.name)} ${this.getHeader('aria2Cmd')} ${JSON.stringify(file.link)}`
       let aria2Line = [file.link, this.getHeader('aria2c'), ` out=${file.name}`].join('\n')
       const sha1Check = this.getConfigData('sha1Check')
